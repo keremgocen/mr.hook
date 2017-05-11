@@ -1,0 +1,24 @@
+{
+  "name": "hook",
+  "version": "1.0.0",
+  "description": "Hook's up Trello with Slack",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && npm run test-unit",
+    "test-unit": "NODE_ENV=test mocha --require co-mocha 'lib/*.spec.js'",
+    "istanbul": "istanbul cover _mocha $(find ./lib -name \"*.spec.js\" -not -path \"./node_modules/*\")"
+  },
+  "author": "Kerem",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^1.6.3"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-google": "^0.7.1",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "standard": "^10.0.2"
+  }
+}

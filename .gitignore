@@ -1,0 +1,11 @@
+
+node_modules/*
+
+# generated server-less framework files
+.serverless*
+# serverless config
+serverless.yml
+# eslint config
+.eslintrc.json
+# coverage
+coverage/*
