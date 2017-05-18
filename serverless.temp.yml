@@ -16,23 +16,35 @@ service: hook
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
+frameworkVersion: "<=1.6.1"
+
+custom:
+  namespace: ${self:service}-${self:custom.stage}
+  stage: ${opt:stage, self:provider.stage}
 
 provider:
   name: aws
   runtime: nodejs4.3
   stage: dev
+  region: us-east-1
   environment:
-    SLACK_CLIENT_ID: 
-    SLACK_CLIENT_SECRET: 
-    SLACK_VERIFICATION_TOKEN: 
-    SLACK_HOOK_URL: 
-    SLACK_TOKEN: 
-    SLACK_CHANNEL_ID: 
+    SLACK_CLIENT_ID:
+    SLACK_CLIENT_SECRET:
+    SLACK_CHANNEL_ID:
     TRELLO_LIST_ID:
     TRELLO_CARD_URL_PREFIX: 'https://trello.com/c/'
     TRELLO_EVENT_TYPE: 'updateCard'
-    INSTALL_ERROR_URL: 
-    INSTALL_SUCCESS_URL:
+    INSTALL_ERROR_URL: https://requestb.in/16iho4f1
+    INSTALL_SUCCESS_URL: https://requestb.in/16iho4f1
+    NAMESPACE: ${self:custom.namespace}
+    TEAMS_TABLE: ${self:custom.namespace}-teams
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource:
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.TEAMS_TABLE}
 
 # you can overwrite defaults here
 #  stage: dev
@@ -68,17 +80,33 @@ provider:
 
 functions:
   hook:
-    handler: hook.handler
+    handler: lib/hook.handler
     events:
         - http:
             path: hook
             method: any # Trello initially makes a HEAD call before a POST for validation, hence "any"
   install:
-    handler: install.handler
+    handler: lib/install.handler
     events:
         - http:
             path: install
             method: get
+
+resources:
+  Resources:
+    TeamsDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TEAMS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: list_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: list_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
 
 
 #    The following are a few example events you can configure
